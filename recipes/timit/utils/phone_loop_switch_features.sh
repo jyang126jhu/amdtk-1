@@ -29,7 +29,7 @@ if [ ! -e $out_dir/.done ]; then
         "pl-vbexp" \
         "$keys" \
         "amdtk_ploop_exp --new_feats=$new_fea_dir/\$ITEM1.$fea_ext \
-            $model $fea_dir/\$ITEM1.$fea_ext \
+            $model $mfcc_fea_dir/\$ITEM1.$fea_ext \
             $out_dir/\$ITEM1.acc" \
         "$out_dir" || exit 1
 
