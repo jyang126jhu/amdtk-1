@@ -9,7 +9,7 @@
 cmd=run.pl
 
 
-stage=3
+stage=-1
 
 nj=4
 feat_type=raw
@@ -38,8 +38,8 @@ if [ -f path.sh ]; then . ./path.sh; fi
 . parse_options.sh || exit 1;
 
 
-if [ $# != 6 ]; then
-  echo "Usage: steps/nnet2/get_lda.sh [opts] <train/test> <post> <mat-dir> <lda-feat-dir> <num-of-states> <lda-out-dim>"
+if [ $# != 4 ]; then
+  echo "Usage: steps/nnet2/get_lda.sh [opts] <train/test> <post> <num-of-states> <lda-out-dim>"
   echo " e.g.: steps/nnet2/get_lda.sh train *.post exp/lda 300"
   echo " As well as extracting the examples, this script will also do the LDA computation,"
   echo " if --est-lda=true (default:true)"
@@ -62,18 +62,22 @@ fi
 
 root=$(pwd -P)
 
-data=$root/data/$1
+datadir=./data
+data=$root/$datadir/$1
 post=$2
-dir=$3
-ldadir=$4
-num_state=$5
-ldadim=$6
+#dir=$3
+#ldadir=$4
+num_state=$3
+ldadim=$4
 
-
-cmvndir=$root/cmvn_mfcc/
-posttype=mfcc_dpgmm
+posttype=$(basename $post .post)
+#posttype=1best_mfcc_s3_g2_sil_10_states
+cmvndir=$root/cmvn_lda_${posttype}
 datatype=$1
+dir=exp/lda/dim_${ldadim}/$posttype
+ldadir=$root/LDA/dim_${ldadim}/$posttype/$datatype
 
+stage=$stage
 [ -z "$left_context" ] && left_context=$splice_width
 [ -z "$right_context" ] && right_context=$splice_width
 
@@ -183,7 +187,8 @@ if [ $stage -le 3 ]; then
      # utils/subset_scp.pl --quiet $N $sdata/JOB/feats.scp | apply-cmvn --utt2spk=ark:$sdata/JOB/utt2spk scp:$sdata/JOB/cmvn.scp scp:- ark:- | splice-feats $splice_opts ark:- ark:- | transform-feats $dir/final.mat ark:- ark,scp:$ldadir/${data}_feat_lda.ark,$ldadir/${data}_feat_lda.scp || exit 1;
      #apply-cmvn --utt2spk=ark:$data/utt2spk scp:$data/cmvn.scp scp:$data/feats.scp ark:- | splice-feats --left-context=5 --right-context=5 ark:- ark:- | transform-feats $dir/final.mat ark:- ark,scp:$ldadir/test_feat_lda.ark,$ldadir/test_feat_lda.scp
     if [ ! -d $ldadir/$datatype ]; then
-	    mkdir $ldadir/$datatype
+	    echo "ldadir is $ldadir"
+	    mkdir -p $ldadir/$datatype
     fi
     splice-feats --left_context=5 --right_context=5 scp:$data/feats.scp ark:- | transform-feats $dir/final.mat ark:- ark,scp:$ldadir/$datatype/feasts.ark,$ldadir/$datatype/feats.scp
     steps/compute_cmvn_stats_per_utt.sh $ldadir/$datatype $cmvndir/lda_dim_${dim}_${posttype}_${datatype} $cmvndir/lda_dim_${dim}_${posttype}_${datatype}

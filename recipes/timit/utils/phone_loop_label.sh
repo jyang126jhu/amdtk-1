@@ -27,7 +27,7 @@ if [ ! -e "$label_dir/.done" ]; then
         --options "$parallel_opts" \
         "pl-label" \
         "$keys" \
-        "amdtk_ploop_label $model $fea_dir/\${ITEM1}.${fea_ext} \
+        "amdtk_ploop_label --hmm_states $model $fea_dir/\${ITEM1}.${fea_ext} \
         $label_dir/\${ITEM1}.lab" \
         "$label_dir" || exit 1
     
